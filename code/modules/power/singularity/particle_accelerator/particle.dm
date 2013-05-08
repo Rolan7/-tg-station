@@ -38,6 +38,11 @@
 	if (A)
 		if(ismob(A))
 			toxmob(A)
+			if(istype(A,/mob/living/carbon/slime/green/)||istype(A,/mob/living/carbon/slime/adult/green/))
+				var/mob/living/carbon/slime/nuclearSlime = A
+				nuclearSlime.toxmob() // Emit deadly radiation to nearby mobs
+				nuclearSlime.pulse() // Emit energetic radiation to nearby collectors
+				world << "Accelerated particle hit slime."
 		if((istype(A,/obj/machinery/the_singularitygen))||(istype(A,/obj/machinery/singularity/)))
 			A:energy += energy
 	return

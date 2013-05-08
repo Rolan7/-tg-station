@@ -263,6 +263,42 @@
 		slime_mutation[3] = /mob/living/carbon/slime/black
 		slime_mutation[4] = /mob/living/carbon/slime/black
 
+/mob/living/carbon/slime/proc/toxmob() // Copied from singularity code, with nutrition level instead of energy level
+	var/toxrange = 10
+	var/toxdamage = 4
+	var/radiation = 15
+	var/radiationmin = 3
+	if (src.nutrition>200)
+		toxdamage = round(((src.nutrition-150)/50)*4,1)
+		radiation = round(((src.nutrition-150)/50)*5,1)
+		radiationmin = round((radiation/5),1)
+	for(var/mob/living/M in view(toxrange, src.loc))
+		if(M == src) continue // Added so the slime doesn't irradiate itself.
+		M.apply_effect(rand(radiationmin,radiation), IRRADIATE)
+		toxdamage = (toxdamage - (toxdamage*M.getarmor(null, "rad")))
+		M.apply_effect(toxdamage, TOX)
+	return
+
+/mob/living/carbon/slime/proc/pulse() // Copied from singularity code, with nutrition level instead of energy level
+	for(var/obj/machinery/power/rad_collector/R in rad_collectors)
+		if(get_dist(R, src) <= 15) // Better than using orange() every process
+			R.receive_pulse(nutrition) // Probably a reasonable amount.  Roughly comparable to a singularity energy level.
+	return
+
+/mob/living/carbon/slime/green/bullet_act(var/obj/item/projectile/Proj)
+	if(!Proj)	return
+	if(Proj.damage_type == BURN) // We've been hit by a heat ray of some kind!  Including basic lasers.
+		toxmob() // Pulse deadly radiation.
+		pulse() // Pulse helpful radiation to nearby collectors.
+	..(Proj)
+
+/mob/living/carbon/slime/adult/green/bullet_act(var/obj/item/projectile/Proj)
+	if(!Proj)	return
+	if(Proj.damage_type == BURN) // We've been hit by a heat ray of some kind!  Including basic lasers.
+		toxmob() // Pulse deadly radiation.
+		pulse() // Pulse helpful radiation to nearby collectors.
+	..(Proj)
+
 // Tier 5
 
 /mob/living/carbon/slime/lightpink
